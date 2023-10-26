@@ -6,7 +6,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.example</groupId>
-  <artifactId>Snake</artifactId>
+  <artifactId>snake</artifactId>
   <version>1.0-SNAPSHOT</version>
 
   <name>Snake</name>
@@ -19,15 +19,13 @@
     <maven.compiler.target>11</maven.compiler.target>
   </properties>
 
-<distributionManagement>
+  <distributionManagement>
     <repository>
-      <uniqueVersion>false</uniqueVersion>
-      <id>corp1</id>
-      <name>Snake-Game</name>
+      <id>github</id>
+      <name>GitHub thecoderenroute Apache Maven Packages</name>
       <url>https://maven.pkg.github.com/thecoderenroute/Snake-game</url>
-      <layout>default</layout>
     </repository>
-</distributionManagement>
+ </distributionManagement>
 
   <build>
     <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
