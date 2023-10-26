@@ -27,7 +27,6 @@
       <url>https://maven.pkg.github.com/thecoderenroute/Snake-game</url>
       <layout>default</layout>
     </repository>
-    ...
 </distributionManagement>
 
   <build>
