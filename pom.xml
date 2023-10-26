@@ -24,7 +24,7 @@
       <uniqueVersion>false</uniqueVersion>
       <id>corp1</id>
       <name>Snake-Game</name>
-      <url>https://github.com/thecoderenroute/Snake-Game</url>
+      <url>https://maven.pkg.github.com/thecoderenroute/Snake-game</url>
       <layout>default</layout>
     </repository>
     ...
