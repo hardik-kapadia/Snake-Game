@@ -19,7 +19,7 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
       - run: mvn clean package -DskipTests
-      - run: mkdir staging && mv target/yb-workload-sim.jar target/Snake-${{ env.build-number }}.jar && cp target/*.jar staging
+      - run: mkdir staging && mv target/snake-game-1.jar target/snake-game-${{ env.build-number }}.jar && cp target/*.jar staging
       - uses: actions/upload-artifact@v3
         with:
           name: Package
