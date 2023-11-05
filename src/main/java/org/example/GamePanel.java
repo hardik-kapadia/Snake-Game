@@ -10,11 +10,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
-import java.awt.image.ImageObserver;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Random;
 
 public class GamePanel extends JPanel implements ActionListener {
