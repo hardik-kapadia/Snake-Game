@@ -23,7 +23,7 @@ public class GamePanel extends JPanel implements ActionListener {
 
     static final int SCREEN_WIDTH = 600;
     static final int SCREEN_HEIGHT = 600;
-    static final int UNIT_SIZE = 15;
+    static final int UNIT_SIZE = 30;
     int delay = 100;
 
     java.util.List<Integer> x = new ArrayList<>();
@@ -42,6 +42,8 @@ public class GamePanel extends JPanel implements ActionListener {
 
     Timer timer;
     Random random;
+
+    SnakeAgent agent;
 
     GamePanel() {
         random = new Random();
@@ -87,16 +89,6 @@ public class GamePanel extends JPanel implements ActionListener {
 
         return exportCurrentState();
     }
-
-    public void startForAgent(SnakeAgent agent) {
-        applesEaten = 0;
-        running = true;
-        delay = 100;
-        direction = 'R';
-        setInitialPosition();
-        newApple();
-    }
-
     public void setInitialPosition() {
 
         x.clear();
@@ -182,9 +174,6 @@ public class GamePanel extends JPanel implements ActionListener {
         // checks if it is going above or below
         if (y.get(0) < 0 || y.get(0) > SCREEN_HEIGHT)
             running = false;
-
-        if (!running)
-            timer.stop();
     }
 
     @Override
@@ -242,8 +231,11 @@ public class GamePanel extends JPanel implements ActionListener {
 
     public SnakeState act(char action) {
 
+        System.out.print("Performing action "+action);
         if(action != 'N')
             direction = action;
+
+        System.out.println(" And now direction is: "+direction);
 
         checkApple();
         move();
@@ -253,21 +245,22 @@ public class GamePanel extends JPanel implements ActionListener {
         t.setInitialDelay(this.delay);
         t.setRepeats(false);
         t.start();
+
         return exportCurrentState();
 
     }
 
-
     @Override
     public void actionPerformed(ActionEvent e) {
 
-        if (running) {
-            checkApple();
-            move();
-            checkCollisions();
-        }
+        checkApple();
+        move();
+        checkCollisions();
 
         repaint();
+
+        if(!running)
+            timer.stop();
     }
 
     public class MyKeyAdapter extends KeyAdapter {

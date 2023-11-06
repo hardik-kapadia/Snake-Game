@@ -1,5 +1,6 @@
 package org.example.RL;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,6 +13,7 @@ import java.util.List;
 @Getter
 @Setter
 @ToString
+@JsonSerialize
 public class SnakeState {
 
     char direction;
@@ -41,7 +43,7 @@ public class SnakeState {
 
     }
 
-    public List<Character> getPossibleActions() {
+    public List<Character> possibleActions() {
 
         if(!running)
             new ArrayList<>();
@@ -60,10 +62,10 @@ public class SnakeState {
     }
 
     // Parameters to consider: Distance to apple, isAlive, number of apples eaten, direction to apple
-    public double getRewardForState() {
+    public double reward() {
 
         if(!running)
-            return -120;
+            return -200;
 
         double reward = 0;
 

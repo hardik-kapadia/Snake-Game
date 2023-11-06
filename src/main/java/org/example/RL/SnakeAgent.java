@@ -2,12 +2,14 @@ package org.example.RL;
 
 import org.example.GameFrame;
 import org.example.GamePanel;
+import org.example.Utils.JsonMapper;
 
+
+import java.io.IOException;
 import java.util.*;
 
 public class SnakeAgent {
 
-    private Map<SnakeState,Character> learnedPolicy;
     private Map<SnakeState, Map<Character,Double>> q;
 
     private double randomNess;
@@ -18,35 +20,67 @@ public class SnakeAgent {
 
     private double learningRate;
 
+    int[] scoreTracker;
+
+    public GameFrame gf;
+
+    public JsonMapper mapper;
+
     public SnakeAgent() {
-        this.learnedPolicy = new HashMap<>();
         this.q= new HashMap<>();
         this.random = new Random();
         this.randomNess = 0.29;
-        this.discount = 0.97;
+        this.discount = 1;
         this.learningRate = 0.7;
+        this.gf = new GameFrame(0);
+        this.mapper = new JsonMapper();
     }
 
     public void runAll(int n) {
 
-        GameFrame gf = new GameFrame(0);
+        this.scoreTracker = new int[100];
+        int score = -1;
 
         for(int i=0;i<n;i++) {
-            System.out.println("Hello");
+            int temp = run(gf);
+
+            if(temp > score)
+                score = temp;
+
+            if(i % (n/100) == 0){
+                System.out.println("Top score: "+score);
+                scoreTracker[i/(n/100)] = score;
+            }
+        }
+
+        System.out.println("Max score: "+score);
+
+        Map<SnakeState,Character> p = this.learnPolicy();
+        try {
+            this.mapper.export(p, "agent1.json");
+        } catch (IOException e){
+            e.printStackTrace();
         }
 
     }
 
-    public void run(GameFrame gf) throws InterruptedException {
+    public void runAll() {
+        runAll(10);
+    }
+
+    public int run(GameFrame gf) {
 
         gf.play();
         GamePanel gp = gf.gp;
 
         SnakeState state = gp.startManualGame(100);
 
+        System.out.println("Starting another game");
+        int latestScore = 0;
+
         while(true) {
 
-            List<Character> actions = state.getPossibleActions();
+            List<Character> actions = state.possibleActions();
 
             if(actions.isEmpty())
                 break;
@@ -65,7 +99,7 @@ public class SnakeAgent {
             SnakeState nState = gp.act(action);
 
             // R(s')
-            double nReward = nState.getRewardForState();
+            double nReward = nState.reward();
 
             // Q(s,a)
             double currentQ = getQValue(state,action);
@@ -77,9 +111,15 @@ public class SnakeAgent {
 
             setQValue(state,action,newQ);
 
+            latestScore = nState.applesEaten;
+
             if(!nState.running)
                 break;
+
+            state = nState;
         }
+        System.out.println("Play through finished with score: "+latestScore);
+        return latestScore;
 
     }
 
@@ -102,7 +142,7 @@ public class SnakeAgent {
         }
 
         Map<Character, Double> vals = q.get(ss);
-
+        System.out.println("Encountered existing state");
         if(!vals.containsKey(action))
             vals.put(action,0.0);
 
@@ -126,8 +166,7 @@ public class SnakeAgent {
 
     public char getIdealAction(SnakeState state) {
 
-
-        List<Character> actions = state.getPossibleActions();
+        List<Character> actions = state.possibleActions();
 
         char randomAction = actions.get(random.nextInt(actions.size()));
 
@@ -144,13 +183,16 @@ public class SnakeAgent {
                 action = entry.getKey();
                 max = entry.getValue();
             }
-
         }
+
+        System.out.println("As per previous calcs, ideal action: "+action);
         return action;
 
     }
 
-    public void learnPolicy() {
+    public Map<SnakeState,Character> learnPolicy() {
+
+        Map<SnakeState,Character> learnedPolicy = new HashMap<>();
 
         for(SnakeState state: q.keySet()){
             char action = getIdealAction(state);
@@ -158,6 +200,8 @@ public class SnakeAgent {
         }
 
         System.out.println("Policy Learned: "+learnedPolicy);
+
+        return learnedPolicy;
 
     }
 
