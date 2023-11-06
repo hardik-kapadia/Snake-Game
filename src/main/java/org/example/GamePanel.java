@@ -1,5 +1,8 @@
 package org.example;
 
+import org.example.RL.SnakeAgent;
+import org.example.RL.SnakeState;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
@@ -12,6 +15,7 @@ import java.awt.event.KeyEvent;
 
 import java.io.IOException;
 import java.io.InputStream;
+
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -25,9 +29,7 @@ public class GamePanel extends JPanel implements ActionListener {
     java.util.List<Integer> x = new ArrayList<>();
 
     java.util.List<Integer> y = new ArrayList<>();
-  
 
-    int bodyParts;
     int applesEaten;
 
     int appleX;
@@ -35,6 +37,8 @@ public class GamePanel extends JPanel implements ActionListener {
 
     char direction; // R,L,U,D;
     boolean running;
+
+    int initialSize = 6;
 
     Timer timer;
     Random random;
@@ -45,80 +49,127 @@ public class GamePanel extends JPanel implements ActionListener {
         this.setBackground(Color.black);
         this.setFocusable(true);
         this.addKeyListener(new MyKeyAdapter());
+    }
+
+    GamePanel(int delay) {
+        this.delay = delay;
+        random = new Random();
+        this.setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
+        this.setBackground(Color.black);
+        this.setFocusable(true);
+        this.addKeyListener(new MyKeyAdapter());
+    }
+
+    public void start(){
         startGame();
     }
 
     public void startGame() {
 
-        bodyParts = 6;
         applesEaten = 0;
-        direction = 'R';
         running = true;
+        delay = 100;
+        direction = 'R';
         setInitialPosition();
         newApple();
         timer = new Timer(delay, this);
         timer.start();
     }
 
-    public void newApple() {
-        appleX = random.nextInt(SCREEN_WIDTH / UNIT_SIZE) * UNIT_SIZE;
-        appleY = random.nextInt(SCREEN_HEIGHT / UNIT_SIZE) * UNIT_SIZE;
+    public SnakeState startManualGame(int delay) {
+
+        applesEaten = 0;
+        running = true;
+        this.delay = delay;
+        direction = 'R';
+        setInitialPosition();
+        newApple();
+
+        return exportCurrentState();
     }
-    private void setInitialPosition() {
+
+    public void startForAgent(SnakeAgent agent) {
+        applesEaten = 0;
+        running = true;
+        delay = 100;
+        direction = 'R';
+        setInitialPosition();
+        newApple();
+    }
+
+    public void setInitialPosition() {
 
         x.clear();
         y.clear();
 
-        int prevX = SCREEN_WIDTH/2;
+        int prevX = SCREEN_WIDTH / 2;
 
-        for(int i=0;i<=bodyParts;i++) {
+        for (int i = 0; i < initialSize; i++) {
             x.add(prevX);
-            y.add(SCREEN_HEIGHT/2);
+            y.add(SCREEN_HEIGHT / 2);
 
             prevX -= UNIT_SIZE;
         }
 
     }
 
+    public SnakeState exportCurrentState() {
+
+        return SnakeState.builder()
+                .applesEaten(applesEaten)
+                .appleX(appleX)
+                .appleY(appleY)
+                .x(x).y(y)
+                .direction(direction)
+                .running(running)
+                .build();
+    }
+
+    public void newApple() {
+        appleX = random.nextInt(SCREEN_WIDTH / UNIT_SIZE) * UNIT_SIZE;
+        appleY = random.nextInt(SCREEN_HEIGHT / UNIT_SIZE) * UNIT_SIZE;
+    }
+
     public void move() {
 
-        for (int i = bodyParts; i > 0; i--) {
-            x.set(i,x.get(i-1));
-            y.set(i,y.get(i-1));
+        for (int i = x.size() - 1; i > 0; i--) {
+            x.set(i, x.get(i - 1));
+            y.set(i, y.get(i - 1));
         }
 
         switch (direction) {
             case 'R':
-                x.set(0,x.get(0)+UNIT_SIZE);
+                x.set(0, x.get(0) + UNIT_SIZE);
                 break;
             case 'L':
-                x.set(0,x.get(0)-UNIT_SIZE);
+                x.set(0, x.get(0) - UNIT_SIZE);
                 break;
             case 'U':
-                y.set(0,y.get(0)-UNIT_SIZE);
+                y.set(0, y.get(0) - UNIT_SIZE);
                 break;
             case 'D':
-                y.set(0,y.get(0)+UNIT_SIZE);
+                y.set(0, y.get(0) + UNIT_SIZE);
                 break;
         }
+
     }
 
     public void checkApple() {
 
         if (x.get(0) == appleX && y.get(0) == appleY) {
-            bodyParts++;
             x.add(-1);
             y.add(-1);
             applesEaten++;
-            delay--;
+            delay = Math.max(0,delay-1);
             newApple();
         }
+
     }
 
     public void checkCollisions() {
 
         // checks if head collides with body
-        for (int i = bodyParts; i > 0; i--)
+        for (int i = x.size() - 1; i > 0; i--)
             if (x.get(0).equals(x.get(i)) && y.get(0).equals(y.get(i))) {
                 running = false;
                 break;
@@ -134,7 +185,6 @@ public class GamePanel extends JPanel implements ActionListener {
 
         if (!running)
             timer.stop();
-
     }
 
     @Override
@@ -154,10 +204,9 @@ public class GamePanel extends JPanel implements ActionListener {
             InputStream iis = getClass().getClassLoader().getResourceAsStream("apple.png");
             Image apple = ImageIO.read(iis);
 
-            g.drawImage(apple,appleX,appleY,UNIT_SIZE,UNIT_SIZE,null);
+            g.drawImage(apple, appleX, appleY, UNIT_SIZE, UNIT_SIZE, null);
 
-
-            for (int i = 0; i < bodyParts; i++) {
+            for (int i = 0; i < x.size(); i++) {
                 if (i == 0)
                     g.setColor(Color.green);
                 else
@@ -187,29 +236,34 @@ public class GamePanel extends JPanel implements ActionListener {
         g.setColor(Color.RED);
         g.setFont(new Font("Ink free", Font.BOLD, 80));
         FontMetrics metricsOver = getFontMetrics(g.getFont());
-        g.drawString("Game Over", (SCREEN_WIDTH - metricsOver.stringWidth("Game Over")) / 2,  SCREEN_HEIGHT / 3 );
+        g.drawString("Game Over", (SCREEN_WIDTH - metricsOver.stringWidth("Game Over")) / 2, SCREEN_HEIGHT / 3);
 
     }
 
-//    public void showRestartButton(Graphics g) {
-//
-//        Button restartButton = new Button("Restart");
-//        restartButton.addActionListener(action -> restartGame());
-//        restartButton.setEnabled(true);
-//        restartButton.setEnabled(true);
-//        restartButton.setVisible(true);
-//        FontMetrics metricsOver = getFontMetrics(g.getFont());
-//        restartButton.setBounds((SCREEN_WIDTH - metricsOver.stringWidth("Restart")) / 2, 2 * SCREEN_HEIGHT / 3,);
-//        this.add(restartButton);
-//
-//    }
+    public SnakeState act(char action) {
+
+        if(action != 'N')
+            direction = action;
+
+        checkApple();
+        move();
+        checkCollisions();
+
+        Timer t = new Timer(this.delay,e -> repaint());
+        t.setInitialDelay(this.delay);
+        t.setRepeats(false);
+        t.start();
+        return exportCurrentState();
+
+    }
+
 
     @Override
     public void actionPerformed(ActionEvent e) {
 
         if (running) {
-            move();
             checkApple();
+            move();
             checkCollisions();
         }
 
@@ -238,7 +292,7 @@ public class GamePanel extends JPanel implements ActionListener {
                         direction = 'D';
                     break;
                 case KeyEvent.VK_ENTER:
-                    if(!running)
+                    if (!running)
                         startGame();
             }
         }

@@ -1,7 +1,17 @@
 package org.example.RL;
 
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
+import java.util.ArrayList;
 import java.util.List;
 
+@Builder
+@Getter
+@Setter
+@ToString
 public class SnakeState {
 
     char direction;
@@ -31,11 +41,29 @@ public class SnakeState {
 
     }
 
+    public List<Character> getPossibleActions() {
+
+        if(!running)
+            new ArrayList<>();
+
+        switch (direction) {
+            case 'R':
+            case 'L':
+                return List.of('U','D','N');
+            case 'U':
+            case 'D':
+                return List.of('R','L','N');
+        }
+
+        return new ArrayList<>();
+
+    }
+
     // Parameters to consider: Distance to apple, isAlive, number of apples eaten, direction to apple
     public double getRewardForState() {
 
         if(!running)
-            return 120;
+            return -120;
 
         double reward = 0;
 
@@ -48,5 +76,57 @@ public class SnakeState {
 
         return reward;
     }
+
+    @Override
+    public boolean equals(Object state) {
+
+        if(! (state instanceof  SnakeState))
+            return false;
+
+        SnakeState s = (SnakeState) state;
+
+        if (!s.running ){
+           if(!running)
+               return true;
+        }
+
+        if(!s.x.equals(x))
+            return false;
+
+        if(!s.y.equals(y))
+            return false;
+
+        if(s.direction != direction)
+            return false;
+
+        if(s.running != running)
+            return false;
+
+        if(s.applesEaten != applesEaten)
+            return false;
+
+        return s.appleX == appleX && s.appleY == appleY;
+
+    }
+
+    @Override
+    public int hashCode() {
+
+        int hash = 0;
+
+        if(!running)
+            return 0;
+
+        hash += (direction - 'A') * 133;
+        hash += appleX * 25;
+        hash += appleY * 25;
+        hash += x.hashCode() * 99;
+        hash += y.hashCode() * 99;
+        hash += applesEaten*10;
+
+        return hash;
+
+    }
+
 
 }
