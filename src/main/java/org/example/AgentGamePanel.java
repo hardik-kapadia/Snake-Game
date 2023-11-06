@@ -1,5 +1,6 @@
 package org.example;
 
+import org.example.RL.Policy;
 import org.example.RL.SnakeAgent;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -7,16 +8,16 @@ import java.awt.event.ActionListener;
 
 public class AgentGamePanel extends GamePanel implements ActionListener {
 
-    SnakeAgent agent;
+    Policy policy;
 
-    AgentGamePanel(SnakeAgent agent) {
+    AgentGamePanel(Policy policy) {
         super();
-        this.agent = agent;
+        this.policy = policy;
     }
 
-    AgentGamePanel(SnakeAgent agent,int delay) {
+    AgentGamePanel(Policy policy,int delay) {
         super(delay);
-        this.agent = agent;
+        this.policy = policy;
     }
 
     @Override
@@ -37,9 +38,9 @@ public class AgentGamePanel extends GamePanel implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
 
-        System.out.println("State is now: "+exportCurrentState());
+        System.out.println("State is now: "+exportCurrentState()+" with reward: "+exportCurrentState().reward());
 
-        char action = agent.getIdealAction(exportCurrentState());
+        char action = policy.getIdealAction(exportCurrentState());
 
         if(action != 'N')
             direction = action;

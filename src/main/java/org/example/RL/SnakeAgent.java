@@ -4,8 +4,6 @@ import org.example.GameFrame;
 import org.example.GamePanel;
 import org.example.Utils.JsonMapper;
 
-
-import java.io.IOException;
 import java.util.*;
 
 public class SnakeAgent {
@@ -29,9 +27,9 @@ public class SnakeAgent {
     public SnakeAgent() {
         this.q= new HashMap<>();
         this.random = new Random();
-        this.randomNess = 0.29;
-        this.discount = 1;
-        this.learningRate = 0.7;
+        this.randomNess = 0.25;
+        this.discount = 0.97;
+        this.learningRate = 0.8;
         this.gf = new GameFrame(0);
         this.mapper = new JsonMapper();
     }
@@ -48,19 +46,12 @@ public class SnakeAgent {
                 score = temp;
 
             if(i % (n/100) == 0){
-                System.out.println("Top score: "+score);
                 scoreTracker[i/(n/100)] = score;
+                System.out.println((i/(n/100)) + ". Max score after "+i+" -> "+score);
             }
         }
 
         System.out.println("Max score: "+score);
-
-        Map<SnakeState,Character> p = this.learnPolicy();
-        try {
-            this.mapper.export(p, "agent1.json");
-        } catch (IOException e){
-            e.printStackTrace();
-        }
 
     }
 
@@ -75,7 +66,7 @@ public class SnakeAgent {
 
         SnakeState state = gp.startManualGame(100);
 
-        System.out.println("Starting another game");
+//        System.out.println("Starting another game");
         int latestScore = 0;
 
         while(true) {
@@ -118,7 +109,7 @@ public class SnakeAgent {
 
             state = nState;
         }
-        System.out.println("Play through finished with score: "+latestScore);
+//        System.out.println("Play through finished with score: "+latestScore);
         return latestScore;
 
     }
@@ -129,6 +120,8 @@ public class SnakeAgent {
             q.put(state,new HashMap<>());
 
         q.get(state).put(action,qv);
+
+        System.out.println("Setting q-Value for "+state+" and "+action+" to "+qv);
 
     }
 
@@ -142,7 +135,6 @@ public class SnakeAgent {
         }
 
         Map<Character, Double> vals = q.get(ss);
-        System.out.println("Encountered existing state");
         if(!vals.containsKey(action))
             vals.put(action,0.0);
 
@@ -185,7 +177,6 @@ public class SnakeAgent {
             }
         }
 
-        System.out.println("As per previous calcs, ideal action: "+action);
         return action;
 
     }
@@ -198,8 +189,6 @@ public class SnakeAgent {
             char action = getIdealAction(state);
             learnedPolicy.put(state,action);
         }
-
-        System.out.println("Policy Learned: "+learnedPolicy);
 
         return learnedPolicy;
 

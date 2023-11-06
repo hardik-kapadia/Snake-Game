@@ -89,6 +89,22 @@ public class GamePanel extends JPanel implements ActionListener {
 
         return exportCurrentState();
     }
+
+    public void setRandomInitialPosition() {
+
+        x.clear();
+        y.clear();
+
+        int prevX = random.nextInt(SCREEN_WIDTH - UNIT_SIZE*initialSize) + UNIT_SIZE*initialSize;
+
+        for (int i = 0; i < initialSize; i++) {
+            x.add(prevX);
+            y.add(SCREEN_HEIGHT / 2);
+
+            prevX -= UNIT_SIZE;
+        }
+
+    }
     public void setInitialPosition() {
 
         x.clear();
@@ -231,11 +247,9 @@ public class GamePanel extends JPanel implements ActionListener {
 
     public SnakeState act(char action) {
 
-        System.out.print("Performing action "+action);
         if(action != 'N')
             direction = action;
 
-        System.out.println(" And now direction is: "+direction);
 
         checkApple();
         move();
@@ -256,8 +270,6 @@ public class GamePanel extends JPanel implements ActionListener {
         checkApple();
         move();
         checkCollisions();
-
-        repaint();
 
         if(!running)
             timer.stop();

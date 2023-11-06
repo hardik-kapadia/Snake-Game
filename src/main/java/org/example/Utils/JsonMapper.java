@@ -47,7 +47,7 @@ public class JsonMapper {
         List<SnakeStateWithPolicy> set = oj.readerForListOf(SnakeStateWithPolicy.class).readValue(f);
 
         for(SnakeStateWithPolicy ssp: set)
-            policy.put(ssp.getState(),ssp.getAction());
+            policy.put(ssp.state(),ssp.action());
 
         return policy;
     }

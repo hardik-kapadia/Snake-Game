@@ -1,10 +1,7 @@
 package org.example.RL;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +10,8 @@ import java.util.List;
 @Getter
 @Setter
 @ToString
+@NoArgsConstructor
+@AllArgsConstructor
 @JsonSerialize
 public class SnakeState {
 
@@ -65,16 +64,16 @@ public class SnakeState {
     public double reward() {
 
         if(!running)
-            return -200;
+            return -1000;
 
         double reward = 0;
 
-        reward -= (2 * distanceToApple() / 850);
+        reward -= (10 * distanceToApple() / 850);
 
         if(directionToApple() != direction)
             reward -= 5;
 
-        reward += applesEaten * 10;
+        reward += applesEaten*20;
 
         return reward;
     }
